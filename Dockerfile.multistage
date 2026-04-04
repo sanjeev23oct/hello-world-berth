@@ -1,0 +1,19 @@
+# Build stage
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+COPY package.json ./
+RUN npm install
+COPY index.js ./
+
+# Runner stage (use this as the "Build target" in Berth)
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/index.js ./
+RUN npm install --omit=dev
+
+EXPOSE 3000
+
+CMD ["node", "index.js"]
